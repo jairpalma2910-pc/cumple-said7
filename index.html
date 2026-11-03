@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta property="og:title" content="¡Has sido convocado! Campeonato Said 7">
 <meta property="og:description" content="Cumpleaños de Said · Viernes 27 de noviembre · 3:00 PM · KidSquad Tijuana">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
@@ -28,7 +28,8 @@
   --score:'Teko','Barlow Condensed','Arial Narrow',sans-serif;
   color-scheme:dark;
 }
-html,body{height:100%;}
+html,body{height:100%;touch-action:manipulation;}
+button,a,.fcard,.stepper,.pktap{touch-action:manipulation;user-select:none;-webkit-user-select:none;}
 body{background:var(--night);color:var(--chalk);font-family:var(--body);overflow:hidden;-webkit-tap-highlight-color:transparent;}
 *{box-sizing:border-box;}
 
@@ -637,6 +638,28 @@ input[type=text]:focus{outline:none;border-color:var(--trophy);}
   }
   heroCard.addEventListener('click',heroPlay);
   heroCard.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); heroPlay(); }});
+
+  /* ---------- Contador oculto (GoatCounter) ---------- */
+  function gc(path){ try{ if(window.goatcounter&&goatcounter.count) goatcounter.count({path:path,title:path,event:true}); }catch(e){} }
+  document.getElementById('rsvp').addEventListener('submit',()=>{ if(document.getElementById('name').value.trim()) gc('confirmo'); });
+  document.getElementById('playpk').addEventListener('click',()=>gc('jugo-penales'));
+  // Toca 5 veces el sello OFICIAL para ver las visitas
+  const stamp=document.querySelector('.ticket .stamp'); let taps=0, tapT=null;
+  stamp.style.cursor='pointer';
+  stamp.addEventListener('click',e=>{ e.stopPropagation(); taps++; clearTimeout(tapT); tapT=setTimeout(()=>taps=0,2500); if(taps>=5){ taps=0; showStats(); } });
+  async function cnt(path){ try{ const r=await fetch('https://cumplesaid.goatcounter.com/counter/'+encodeURIComponent(path)+'.json'); if(!r.ok) return '0'; return (await r.json()).count||'0'; }catch(e){ return null; } }
+  async function showStats(){
+    let box=document.getElementById('gcStats');
+    if(!box){ box=document.createElement('div'); box.id='gcStats';
+      box.style.cssText='position:fixed;z-index:60;left:50%;top:50%;transform:translate(-50%,-50%);width:min(320px,88vw);background:#0d1712;border:2px solid #f2c230;border-radius:16px;padding:18px;text-align:center;color:#f4f7f2;font-family:var(--body);box-shadow:0 20px 50px rgba(0,0,0,.7)';
+      document.body.appendChild(box); box.addEventListener('click',()=>box.remove()); }
+    box.innerHTML='<div style="font-family:var(--display);font-size:1.6rem;color:#f2c230">ESTADÍSTICAS</div><p style="margin:8px 0;font-size:1.1rem">Cargando…</p>';
+    const [v,c,k]=await Promise.all([cnt('TOTAL'),cnt('confirmo'),cnt('jugo-penales')]);
+    box.innerHTML = v===null ? '<p style="margin:0;font-size:1.1rem">No se pudo leer el contador. Revisa que en GoatCounter esté activado el contador público.</p><p style="margin:10px 0 0;font-size:.9rem;opacity:.7">Toca para cerrar</p>'
+      : '<div style="font-family:var(--display);font-size:1.6rem;color:#f2c230">ESTADÍSTICAS</div>'
+       +'<div style="font-family:var(--score);font-size:3rem;line-height:1">'+v+'</div><div style="font-weight:700;letter-spacing:.12em;font-size:.85rem;opacity:.8">VISITAS</div>'
+       +'<p style="margin:12px 0 0;font-size:1.15rem">✅ Le dieron a confirmar: <b>'+c+'</b><br>🧤 Jugaron penales: <b>'+k+'</b></p><p style="margin:10px 0 0;font-size:.9rem;opacity:.7">Toca para cerrar</p>';
+  }
   /* ---------- Cuenta regresiva (27 nov 2026, 3:00 PM hora de Tijuana) ---------- */
   const target=new Date('2026-11-27T15:00:00-08:00').getTime();
   const pad=v=>String(v).padStart(2,'0');
@@ -794,5 +817,6 @@ input[type=text]:focus{outline:none;border-color:var(--trophy);}
 })();
 </script>
 
+<script data-goatcounter="https://cumplesaid.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
